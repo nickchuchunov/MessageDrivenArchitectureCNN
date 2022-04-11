@@ -37,7 +37,8 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
             {
                 cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest");});
 
-                cfg.ReceiveEndpoint("direct_excenge", e => { e.Consumer<Kitchen>(); });
+                cfg.ReceiveEndpoint("Notifications", e => { e.Consumer<Kitchen>(); });
+                
             });
              
             bus.Start();

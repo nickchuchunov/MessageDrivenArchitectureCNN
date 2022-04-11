@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MassTransit;
 using System.Collections.Concurrent;
+
 
 namespace MessageDriven_ArchitectureCNN_1
 {
-    internal class NotificationsMassTransit 
+    internal class NotificationsMassTransit : IConsumer<ITableBoked>
     {
 
       internal   ConcurrentDictionary<Guid, ITableBoked > State { get; set; }
 
 
 
-      internal   NotificationsMassTransit() 
+     public   NotificationsMassTransit() 
         {
            
             State = new ConcurrentDictionary<Guid, ITableBoked>();
@@ -22,24 +24,23 @@ namespace MessageDriven_ArchitectureCNN_1
         }
 
 
-        public void Accept(Guid orderId, ITableBoked tableBoked)
+        public Guid OrderId { get; set; }
+        public Guid ClientId { get; set; }
+        public int StateId { get; set; }
+        public bool KitchenStatus { get; set; }
+
+        /// <summary>
+        /// публикуем полученное сообщение от booking
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+
+        public async Task Consume(ConsumeContext<ITableBoked> context)
         {
-            State[orderId]= tableBoked;
-
-
+           await Task.Run(() => { Console.WriteLine($"Заказ от столика {context.Message.StateId}, с индификатором {context.Message.StateId} от клиенат {context.Message.ClientId} в  статусе {context.Message.KitchenStatus} "); });
+            //return Task.CompletedTask;
         }
 
-        internal void Notifi(Guid orderId)
-        {
-            var booking = State[orderId];
-            if (booking.KitchenStatus == true)
-            {
-                Console.WriteLine($"Заказ {booking.OrderId} за столиком {booking.StateId}  Успешно забранирован для клиента {booking.ClientId}");
-
-            }
-            else { Console.WriteLine($"Мы не можем выполнить заказ {booking.OrderId} для клиента {booking.ClientId} "); }
-
-        }
 
 
     }
