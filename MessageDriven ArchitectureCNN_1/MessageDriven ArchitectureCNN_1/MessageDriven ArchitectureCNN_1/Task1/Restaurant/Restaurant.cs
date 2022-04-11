@@ -16,7 +16,7 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
         Producer producer { get; set; }
         
 
-        private List<Table> _tables = new List<Table>();
+        private static List<Table> _tables = new List<Table>();
 
             public Restaurant()
           {

@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using MassTransit;
+using MassTransit.Configuration;
+using MassTransit.AspNetCoreIntegration;
+using MessageDriven_ArchitectureCNN_1;
 using MessageDriven_ArchitectureCNN_1.Task2;
 
 namespace MessageDriven_ArchitectureCNN_1.Task1
@@ -18,8 +22,10 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
         Restaurant rest { get; set; }
 
         Consumer cons { get; set; }
+        
 
         EventHandler<BasicDeliverEventArgs> receiveCallback;
+        private readonly IBus bus;
 
         internal Notifications()
         {
@@ -27,7 +33,23 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
             cons = new Consumer("KeyRestaurant", "localhost");
             DelegateFunction delegateFunction = new DelegateFunction();
             receiveCallback = delegateFunction.MessageHandlerFunction;
+            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest");});
+
+                cfg.ReceiveEndpoint("Notifications", e => { e.Consumer<Kitchen>(); });
+                
+            });
+             
+            bus.Start();
+            this.bus = bus;
+
+
+
+
+
         }
+
 
 
 
@@ -43,12 +65,13 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
                "- мы уведомим вас по смс (асинхронно)" +
                "\n2 - подождите на линии , мы Вас оповестим (синхронно)" +
                "\n3 - Вы уходите? Вам нужно сообщить номер столика для снятия брони (Синхронно) " +
-               "\n4 - Вы уходите? Вам нужно сообщить номер столика для снятия брони (Асинхронно)"
+               "\n4 - Вы уходите? Вам нужно сообщить номер столика для снятия брони (Асинхронно)"+
+               "\n5 - Вам нужно сделать заказ   "
                );
 
                 var choice = Console.ReadLine();
 
-                if (int.TryParse(choice, out int dialogue) && dialogue <= 4 && dialogue >= 1) 
+                if (int.TryParse(choice, out int dialogue) && dialogue <= 5 && dialogue >= 1) 
                 {
                 Console.WriteLine("Ваше сообщение принято в обработку");    
                 }        
@@ -99,8 +122,23 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
                             rest.RemovingReservationAsync(tableNumber);
                             Task.Run(() => { cons.Receive(receiveCallback); });
                         };
-                        break; 
+                        break;
+                    case 5:
+                        {
+                            Console.WriteLine("Привет желаете сделать заказ ! Сообщите ваш номер столика");
+                           int StateId = int.Parse(Console.ReadLine());
+                            TableBoked tableBoked = new TableBoked();
+                            tableBoked.OrderId = Guid.NewGuid();
+                            tableBoked.ClientId = Guid.NewGuid();
+                            tableBoked.StateId = StateId;
+                            tableBoked.KitchenStatus = false;
+                            bus.Publish(tableBoked);
+                           
 
+
+
+                        };
+                        break;
                 }
 
                 stopWatch.Stop();
