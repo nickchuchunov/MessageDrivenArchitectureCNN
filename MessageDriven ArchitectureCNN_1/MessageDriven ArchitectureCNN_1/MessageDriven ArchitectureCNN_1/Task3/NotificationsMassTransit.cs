@@ -23,7 +23,7 @@ namespace MessageDriven_ArchitectureCNN_1
 
         }
 
-
+`
         public Guid OrderId { get; set; }
         public Guid ClientId { get; set; }
         public int StateId { get; set; }
@@ -40,7 +40,7 @@ namespace MessageDriven_ArchitectureCNN_1
            await Task.Run(() => { Console.WriteLine($"Заказ от столика {context.Message.StateId}, с индификатором {context.Message.StateId} от клиенат {context.Message.ClientId} в  статусе {context.Message.KitchenStatus} "); });
             //return Task.CompletedTask;
         }
-
+   
 
 
     }

@@ -22,7 +22,7 @@ namespace MessageDriven_ArchitectureCNN_1.Task1
 
          Random random = new Random();   
 
-         StatesCount = random.Next(1, 5); //Количество мест за каждым столом случайно
+         StatesCount = random.Next(1, 5);    //Количество мест за каждым столом случайно
         
         
         
